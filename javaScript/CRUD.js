@@ -1,89 +1,62 @@
-let input = document.querySelector(".input");
-let submit = document.querySelector(".add");
-let tasks = document.querySelector(".tasks");
-
-let DB = [];
-if (localStorage.getItem("taskes") != null) {
-  console.log("!=null");
-  DB = JSON.parse(localStorage.getItem("taskes"));
-  DisplayTaskInPage();
-} else {
-  DB = [];
-}
-submit.addEventListener("click", function () {
-  if (input.value !== "") {
-    AddTaskToArray(input.value);
-    input.value = "";
+let input =document.getElementById('input');
+let btnInput=document.getElementById('btn');
+let InsertValueInput=document.getElementById('InsertValueInput')
+let boxes=document.querySelectorAll('.box')
+ 
+let drag=null;
+let DB=[]
+btnInput.addEventListener('click',function () {
+ 
+  let Data={
+    input:input.value
   }
-});
-function AddTaskToArray(taskText) {
-  //Task Data
-  let task = {
-    id: Date.now(),
-    title: taskText,
-    complet: false,
-  };
-  //push task (Object) to array of tasks
-  DB.push(task);
+  DB.push(Data)
+  console.log(DB)
+  input.value=''
+  input.focus()
+  displayData()
+  dragItem()
+})
 
-  //add taskes to local Storage
-  localStorage.setItem("taskes", JSON.stringify(DB));
-
-  //Add Tasks to page
-  DisplayTaskInPage();
-
-  window.onload = input.focus();
-}
-//DB =====> ArrayOftaskes
-function DisplayTaskInPage() {
-  let cartonna = ``;
-  let x=[]
-  let y=[]
+function displayData(){
+  let cartonna=``;
   for (let i = 0; i < DB.length; i++) {
-      
-    if (DB[i].complet) {
-        let completTaskes=DB[i].complet;
-        x.push(completTaskes)
-        
-      cartonna += `
-            <div class="task done" data-id="${DB[i].id}">${DB[i].title}
-                <span class="del" onclick="deleteTask(${i})">Delete</span>
-            </div>
-            `;
-    } else {
-        let completTaskes=DB[i].complet;
-        y.push(completTaskes)
-      cartonna += `
-            <div class="task" data-id="${DB[i].id}">${DB[i].title}
-                <span class="del" onclick="deleteTask(${i})">Delete</span>
-            </div>
-            `;
-    }
+    cartonna+=`
+    <p draggable="true" class="item text-light font-weight-bolder text-uppercase" > ${DB[i].input}</p>
+
+    `    
   }
-  tasks.innerHTML = cartonna;
-  console.log(x.length,y.length)
-  document.getElementById('completNumber').innerHTML=x.length
-  document.getElementById('TasksProcess').innerHTML=y .length
+  InsertValueInput.innerHTML=cartonna
 }
+function dragItem() {
+  let items=document.querySelectorAll('.item')
+  items.forEach(item => {
+    item.addEventListener('dragstart',function () {
 
-function deleteTask(e) {
-  DB.splice(e, 1);
-  localStorage.setItem("taskes", JSON.stringify(DB));
-  DisplayTaskInPage();
-}
-tasks.addEventListener("click", function (e) {
-  if (e.target.classList.contains("task")) {
-    toggleStatusTaskWith(e.target.getAttribute("data-id"));
-    e.target.classList.toggle("done");
-  }
-});
+      drag=item;
+      console.log(item)
+      item.style.opacity='0.5'
+    })
+    item.addEventListener('dragend',function(){
+      drag=null
+      item.style.opacity='1'
+    })
 
-function toggleStatusTaskWith(taskId) {
-  for (let i = 0; i < DB.length; i++) {
-    if (DB[i].id == taskId) {
-      DB[i].complet == false ? (DB[i].complet = true) : (DB[i].complet = false);
-    }
-  }
-
-  localStorage.setItem("taskes", JSON.stringify(DB));
+    boxes.forEach(box => {
+      box.addEventListener('dragover',function(e){
+        e.preventDefault(); 
+        this.style.background='#090'
+        this.style.color='#fff'
+      })
+      box.addEventListener('dragleave',function(){
+        this.style.background='#FFF'
+        this.style.color='#000'
+       })
+       box.addEventListener('drop',function(){
+         box.append(drag)
+         this.style.background='#FFF'
+         this.style.color='#000'
+       })
+    });
+  });
 }
